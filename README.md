@@ -57,8 +57,10 @@ Diese sollten also entsprechend zuerst eingestellt werden. Das heißt auch, dass
 ## 3D-Druck-Vorlage
 Die im Projekt integrierten 3D-Vorlagen enthalten einmal den Drehknopf passend für einen 600P/R-Drehgeber und das Gehäuse mit allen Haltern.  
 Das Gehäuse ist sowohl für ESP32-D1-Mini wie auch für den Raspi Pico geeignet. Der Ausschnitt ist für ein 0.96"-OLED-Display (SSD1306) vorbereitet.  
-Das Gehäuse ist so entworfen worden, dass kein 3D-Druck mit Support nötig ist. Der Halter im Displayausschnitt lässt sich leicht entfernen.  
+Das Gehäuse ist so entworfen worden, dass kein 3D-Druck mit Support nötig ist.  
+Der Halter im Displayausschnitt lässt sich leicht entfernen.  
 Die Teile werden mit M3-Schrauben und Muttern montiert. Schaut am besten in Eurem M3-Sortimentskasten, was für Euch am besten passt. Die Schrauben für die Montage des Drehgebers sollten allerdings möglichst kurz sein.  
+Falls der Drehknopf auf dem Gehäuse schleift, ist es ausreichend, einen rundgebogenen 0.8mm Kupferlackdraht unter dem Knopf auf die Achse zu stecken.  
 **Dieses Gehäuse ist für das Projekt nicht unbedingt erforderlich!**
 Es kann natürlich jedes beliebige Holzbrett, Holzkiste oder Blechgehäuse verwendet werden. 
 Wer allerdings ein formschönes Gehäuse benötigt und einen 3D-Drucker hat, hat hier eine gute Vorlage. 
