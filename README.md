@@ -1,4 +1,6 @@
 # HID-Panel
+![Overview with wooden panel and Arcade-Buttons, 3D-printed Case and Phone displaying the config interface](HID-Panels.png)
+
 **Bluetooth-HID-Emulation with ESP32, configuration per WIFI-Portal**  
 Since this project is also aimed at German-speaking youth work, the German language is used here. Please use your browser's translation function if you need this in English or another language ;)  
 
@@ -58,3 +60,5 @@ Die Teile werden mit M3-Schrauben und Muttern montiert. Schaut am besten in Eure
 **Dieses Gehäuse ist für das Projekt nicht unbedingt erforderlich!**
 Es kann natürlich jedes beliebige Holzbrett, Holzkiste oder Blechgehäuse verwendet werden. 
 Wer allerdings ein formschönes Gehäuse benötigt und einen 3D-Drucker hat, hat hier eine gute Vorlage. 
+![](3DPrint.png)
+![](3d-Print.png)
