@@ -9,6 +9,8 @@ Since this project is also aimed at German-speaking youth work, the German langu
 Ziel dieses Projektes ist, mit einem ESP32 und ein paar Tasten, Schalter und Drehencoder einen Tastaturemulator zu bauen.  
 Die Konfiguration erfolgt über ein Webinterface, das eine zusätzliche App überflüssig macht.  
 Das Gerät meldet sich bei normalem Start als Bluetooth-Tastatur (mit Medientasten und Mausfunktion), die sich mit jedem Gerät koppeln lässt (Windows, Linux, MacOs, Android, iOS). 
+**Der Code wurde mit wesentlicher Hilfe von Google Gemini erstellt.**  
+(Natürlich ist das unschön, allerdings hat es mich so nur ein paar Urlaubstage und nicht mehrere Urlaubswochen gekostet. Wer einen ähnlichen Code handgeschrieben hinbekommt und mir ein Update schicken möchte, kann das natürlich gerne machen...)  
 
 ## Programmierung
 Im Projekt liegt eine *.bin-Datei, die sich hiermit auf einen neuen ESP32-D1-Mini spielen lassen sollte:
