@@ -29,7 +29,7 @@ Ebenfalls werden dort die Anschlüsse eines Drehgebers, der Taster und Schalter 
 **ACHTUNG:**
 - **Der erste konfigurierte Taster ist der Button, mit dem das WIFI-Interface gestartet wird (innerhalb der ersten 5 Sekunden nach Start/Reset).**  
 - **Der zweite konfigurierte Taster wird zusammen mit dem ersten Taster gedrückt, um das Gerät neu zu starten.**  
-Diese sollten also entsprechend zuerst eingestellt werden. Das heißt auch, dass mindestens zwei Taster erforderlich sind. 
+Diese sollten also entsprechend zuerst eingestellt werden. Das heißt auch, dass mindestens zwei Taster erforderlich sind. **Alle Schalter und Taster müssen gegen GND verbunden werden.** Die Eingänge werden mit den im ESP integrierten PullUp-Widerständen gelesen. 
 - Es lassen sich bis zu 8 Taster konfigurieren, ggf. auch als Schalter.
 
 - Ein Display ist optional. Es wird nur das SSD1306-OLED-Display unterstützt, Anschlüsse SDA->GPIO21; SCL->GPIO22 (Adresse 0x3C, also so wie bei diesen OLEDs üblich). Bei nicht vorhandenem Display wird dies einfach übersprungen. 
@@ -38,7 +38,7 @@ Diese sollten also entsprechend zuerst eingestellt werden. Das heißt auch, dass
   Unter "Hardware" wird eingestellt, auf welchen GPIOS A/CTRL und B/DTR angeschlossen werden (GND->GND; VCC->3.3V)  
   Empfohlene Einstellung bei mechanischen Drehgebern wie z.B. einem KY-040: 20 Schritte/U; 1 Schritte (Fein); 1000° Winkel/s (Fast)  
   Empfohlene Einstellung bei optischen Drehgebern wie z.B. einem 600P/R: 600 Schritte/U; 20 Schritte (Fein); 360° Winkel/s (Fast)  
-  **WICHTIG BEI OPTISCHEN DREHGEBERN "5-24V":** VCC des Drehgebers auf 5V und unbedingt D1 auf ESP32 (neben USB-Anschluss) mit einem Draht überbrücken!  
+  **WICHTIG BEI OPTISCHEN DREHGEBERN "5-24V":** VCC des Drehgebers auf 5V und unbedingt D1 auf ESP32 (neben USB-Anschluss) mit einem Draht überbrücken! Die Ausgänge der optischen Drehgeber sind spannungslose "OpenCollector"-Ausgänge, daher ist das kein Problem mit dem 3.3V-Controller.  
 
 - Unter "Szenen" lassen sich bis zu 5 verschiedene Layout-Szenarien festlegen (Beispiele: Media, Scroll, Game, Video, Funk)
   Die Umschaltung der Szenen lässt sich wie alle Kommandos auf beliebige Buttons und Schalter legen (ganz unten in der jeweiligen Auswahl). 
