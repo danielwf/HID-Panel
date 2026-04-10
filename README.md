@@ -20,6 +20,7 @@ Für die Installation per Arduino-IDE (2.3.6 oder höher) werden folgende Abhän
 - per Board Manager: Arduino ESP32-Boards (by Arduino)
 - per Library Manager: ESPAsyncWebServer (by ESPAsync), Adafruit_SSD1306 (by Adafruit)
 - liegt dem Projekt bei (unter src): eine auf aktuelle Arduino-Versionen angepasste HID-BLE Bibliothek von https://github.com/Kopunk/ESP32-BLE-Combo (DANKE!)
+(Beim Kompilieren wird durch die HID-BLE-Bibliothek eine Warnung bezüglich der veralteten Verwendungs des ADC ausgegeben. Diese einfach ignorieren.)
 
 ## Konfiguration
 Die Konfiguration erfolgt über ein Webinterface, das beim Erststart automatisch gestartet wird. (SSID: HID-Panel-Cfg - PW: 12345678 )
