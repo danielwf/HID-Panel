@@ -13,10 +13,10 @@ Das Gerät meldet sich bei normalem Start als Bluetooth-Tastatur (mit Medientast
 (Natürlich ist das unschön, allerdings hat es mich so nur ein paar Urlaubstage und nicht mehrere Urlaubswochen gekostet. Wer einen ähnlichen Code handgeschrieben hinbekommt und mir ein Update schicken möchte, kann das natürlich gerne machen...)  
 
 ## Programmierung
-Im Projekt liegt eine *.bin-Datei, die sich hiermit auf einen neuen ESP32-D1-Mini spielen lassen sollte:
-https://web.esphome.io/ (Chromium/Edge/Vivaldi/Chrome-Browser benötigt)
+Im Projekt liegt eine *.bin-Datei, die sich hiermit auf einen neuen ESP32-D1-Mini flashen lässt:
+https://espressif.github.io/esptool-js/ (Chromium/Edge/Vivaldi/Chrome-Browser benötigt)
 
-Für die Installation per Arduino-IDE werden folgende Abhängigkeiten benötigt: 
+Für die Installation per Arduino-IDE (2.3.6 oder höher) werden folgende Abhängigkeiten benötigt: 
 - per Board Manager: Arduino ESP32-Boards (by Arduino)
 - per Library Manager: ESPAsyncWebServer (by ESPAsync), Adafruit_SSD1306 (by Adafruit)
 - liegt dem Projekt bei (unter src): eine auf aktuelle Arduino-Versionen angepasste HID-BLE Bibliothek von https://github.com/Kopunk/ESP32-BLE-Combo (DANKE!)
