@@ -6,7 +6,7 @@
 #include "wifi_portal.h"
 #include "hid_ble.h"
 
-const char* currentVersion = "260419A";
+const char* currentVersion = "260419B";
 
 
 // Hilfsfunktion für das Faden (Sinus-basiert für weichen Übergang)
@@ -16,6 +16,7 @@ void fadeLEDs(int pin1, int pin2, unsigned long ms) {
     if (pin1 != -1) analogWrite(pin1, (int)brightness);
     if (pin2 != -1) analogWrite(pin2, (int)brightness);
 }
+
 
 void setup() {
     Serial.begin(115200);
@@ -115,6 +116,10 @@ void setup() {
 
 void loop() {
     updateHardware(); 
+    //if (!configModeActive) {
+        // Diese Funktion in hid_ble.cpp prüft die 20s selbst
+        //checkSleep(); <-- Irrweg, blockiert das ganze Gerät. Vielleicht irgendwann ein anderes Mal fixen... 
+    //}
 
     if (configModeActive) {
         handlePortal();

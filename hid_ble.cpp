@@ -12,6 +12,39 @@ void initBLE() {
     Serial.println(">>> [BLE] Init abgeschlossen.");
 }
 
+void checkSleep() {
+    if (keyboard.isPaired() && keyboard.getIdleTime() >= 20000) {
+        goToSleep();
+    }
+}
+
+void goToSleep() {
+    Serial.println(F(">>> [BLE] Idle Timeout -> Light Sleep"));
+    
+    keyboard.beforeSleep(); 
+
+    // Wir registrieren alle belegten Pins als Weckquelle
+    uint64_t mask = 0;
+    for (int i = 0; i < 8; i++) {
+        if (config.buttons[i].pinInput != -1 && config.buttons[i].pinInput <= 39) {
+            mask |= (1ULL << config.buttons[i].pinInput);
+        }
+    }
+
+    // ESP32 Hardware-Einschränkung: 
+    // ESP_EXT1_WAKEUP_ANY_LOW ist der korrekte Name für "Einer der Pins geht auf LOW"
+    // (In manchen ESP-Versionen heißt es ESP_EXT1_WAKEUP_ALL_LOW bei nur einem Pin, 
+    // aber wir nehmen die sicherste Variante für Taster):
+    esp_sleep_enable_ext1_wakeup(mask, ESP_EXT1_WAKEUP_ALL_LOW);
+
+    // Jetzt schlafen legen
+    esp_light_sleep_start();
+
+    // Nach dem Aufwachen:
+    keyboard.afterWake();
+    Serial.println(F(">>> [BLE] Wach!"));
+}
+
 void sendAction(uint16_t code, uint8_t modifiers, int btnIdx) {
     // 1. Lokale Szenenwechsel (2000-2004)
     if (code >= 2000 && code <= 2004) {
