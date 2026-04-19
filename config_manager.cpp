@@ -14,8 +14,8 @@ const KeyMap hidKeys[] = {
   // Media Keys (Interne IDs für unser Switch-Case)
   {401, "Vol +"}, {402, "Vol -"}, {403, "Mute"}, {404, "Play/Pause"}, {405, "Next"}, {406, "Prev"},
   
-  // Maus-Sektion
-  {3001, "Maus: Scroll Up"}, {3002, "Maus: Scroll Down"}, {3003, "Maus: Klick Links"}, {3004, "Maus: Klick Rechts"}
+  // Maus-Sektion -- Mausemulation entfernt, nachdem es mit dem Combo-Gerät nur Probleme mit iOS hab... 
+  //{3001, "Maus: Scroll Up"}, {3002, "Maus: Scroll Down"}, {3003, "Maus: Klick Links"}, {3004, "Maus: Klick Rechts"}
 };
 const int keyCount = sizeof(hidKeys) / sizeof(KeyMap);
 

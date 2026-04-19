@@ -7,6 +7,7 @@
 AsyncWebServer server(80);
 DNSServer dnsServer;
 
+extern const char* currentVersion;
 bool configModeActive = false;
 const char* ssid = "HID-Panel-Cfg";
 const char* pass = "12345678";
@@ -202,7 +203,21 @@ void setupWebRoutes() {
       res->printf("<section><b>Btn %d</b><br>Label: <input name='l%d' value='%s'> GPIO In: <input type='number' name='p%d' value='%d'> LED Out: <input type='number' name='led%d' value='%d'>", i+1, i, config.buttons[i].label, i, config.buttons[i].pinInput, i, config.buttons[i].pinLED); 
       res->printf("<br>Modus: <select name='m%d'><option value='0'%s>Taster</option><option value='1'%s>Schalter</option></select></section>", i, (config.buttons[i].isSwitch==0?" selected":""), (config.buttons[i].isSwitch==1?" selected":""));
     } 
-    res->print(F("<section><input type='submit' value='Speichern und Reset' class='btn'></section></form><section><h3>OTA Update</h3><form method='POST' action='/update' enctype='multipart/form-data'><input type='file' name='update'><br><br><input type='submit' value='Firmware Flash' class='btn' style='background:#28a745;'></form></section></body></html>")); 
+    res->print(F("<section><input type='submit' value='Speichern und Neustart' class='btn'></section></form>"));
+// --- OTA Update & Version ---
+    res->print(F("<section><h3>OTA Update</h3>"));
+    res->printf("<p class='hint'>Aktuelle Firmware: <b>%s</b></p>", currentVersion);
+    res->print(F("<form method='POST' action='/update' enctype='multipart/form-data' id='upload_form'>"));
+    res->print(F("<input type='file' name='update' id='file_input'><br><br>"));
+    res->print(F("<input type='submit' value='Firmware Flash' class='btn' style='background:#28a745;' onclick='if(!document.getElementById(\"file_input\").value){alert(\"Bitte erst eine Datei wählen!\");return false;}this.value=\"Flashing... Bitte 2-3min warten, Gerät startet anschließend neu\";'>"));
+    res->print(F("</form></section>"));
+
+    // --- Werkseinstellungen ---
+    res->print(F("<section style='border: 2px solid #d9534f;'><h3>Werkseinstellungen</h3>"));
+    res->print(F("<p class='hint'>Alle Einstellungen zu Tastern, Schaltern, LEDs, Drehgebern, Befehle und Szenen werden unwiderruflich gelöscht.</p>"));
+    res->print(F("<button class='btn' style='background:#d9534f;' onclick='if(confirm(\"Möchtest du wirklich ALLE Einstellungen löschen? (1/3)\")) if(confirm(\"Bist du absolut sicher? Du musst ALLES neu einstellen! (2/3)\")) if(confirm(\"Letzte Chance: Wirklich ALLES auf Werkseinstellungen zurücksetzen? (3/3)\")) location.href=\"/factory-reset\";'>Alle Einstellungen zurücksetzen</button>"));
+    res->print(F("</section></body></html>"));
+    
     r->send(res); 
   });
 
@@ -223,8 +238,64 @@ void setupWebRoutes() {
     ESP.restart(); 
   });
 
-  server.on("/update", HTTP_POST, [](AsyncWebServerRequest *r){ ESP.restart(); }, [](AsyncWebServerRequest *r, String fn, size_t idx, uint8_t *data, size_t len, bool final){ if(!idx){ if(!Update.begin(UPDATE_SIZE_UNKNOWN)) Update.printError(Serial); } if(!Update.hasError()){ if(Update.write(data, len) != len) Update.printError(Serial); } if(final){ if(Update.end(true)) Serial.printf("OK: %u\n", idx+len); else Update.printError(Serial); } });
-  
+  server.on("/update", HTTP_POST, 
+    [](AsyncWebServerRequest *request) {
+      bool success = !Update.hasError();
+      
+      // Wir erstellen die Antwort direkt
+      AsyncWebServerResponse *response = request->beginResponse(200, "text/plain", 
+        success ? "OK. Update erfolgreich, starte neu..." : "Update Fehler!");
+      
+      // Header setzen, um die Verbindung sauber zu beenden
+      response->addHeader("Connection", "close");
+      request->send(response);
+      
+      if (success) {
+        delay(1000);
+        ESP.restart();
+      }
+    },
+    [](AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final) {
+      if (!index) {
+          Serial.printf("Update Start: %s\n", filename.c_str());
+          
+          // Wir beenden alle stromfressenden Prozesse, falls möglich
+          // (In diesem Modus ist BT eh aus, das ist gut)
+          
+          // WICHTIG: Prüfen, ob genug Platz da ist
+          uint32_t maxSketchSpace = (ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000;
+          if (!Update.begin(maxSketchSpace)) { // Explizite Größe statt UNKNOWN
+              Update.printError(Serial);
+          }
+      }
+      
+      if (!Update.hasError()) {
+        if (Update.write(data, len) != len) {
+          Update.printError(Serial);
+        }
+      }
+      
+      if (final) {
+        if (Update.end(true)) {
+          Serial.printf("Update Fertig: %u bytes\n", index + len);
+        } else {
+          Update.printError(Serial);
+        }
+      }
+    }
+  );
+
+  server.on("/factory-reset", HTTP_GET, [](AsyncWebServerRequest *r) {
+    Serial.println(">>> [SYSTEM] Factory Reset angefordert...");
+    if (LittleFS.exists(configPath)) {
+        LittleFS.remove(configPath);
+    }
+    AsyncWebServerResponse *response = r->beginResponse(200, "text/html", "<html><body><h1>Reset OK</h1><p>Werkseinstellungen geladen. Starte neu...</p></body></html>");
+    r->send(response);
+    delay(1000);
+    ESP.restart();
+  });
+
   server.onNotFound([](AsyncWebServerRequest *request){
     request->redirect("/");
   });

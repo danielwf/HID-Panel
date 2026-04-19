@@ -6,7 +6,8 @@
 #include "wifi_portal.h"
 #include "hid_ble.h"
 
-// Quelle der Bluetooth-lib: https://github.com/Kopunk/ESP32-BLE-Combo - Bitte die korrigierte Version verwenden, die in diesem Projekt mit ausgeliefert wird (die Warnung zum ADC beim Kompilieren ignorieren...)
+const char* currentVersion = "260419A";
+
 
 // Hilfsfunktion für das Faden (Sinus-basiert für weichen Übergang)
 void fadeLEDs(int pin1, int pin2, unsigned long ms) {

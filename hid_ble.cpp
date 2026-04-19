@@ -1,74 +1,104 @@
 #include "hid_ble.h"
-#include "src/ESP32-BLE-Combo-master/BleCombo.h"
+#include <HijelHID_BLEKeyboard.h>
 #include "config_manager.h"
 #include "hardware_io.h"
 
-// Die Instanz muss exakt so heißen wie im Example
-BleCombo bleCombo;
-bool bleConnected = false;
+HijelHID_BLEKeyboard keyboard;
 
 void initBLE() {
-    Serial.printf(">>> [BLE] Initialisiere mit Name: %s\n", config.deviceName);
-    // Wir lassen setName weg, da es in der Lib oft hardcodiert ist
-    bleCombo.setName(std::string(config.deviceName));
-    bleCombo.begin();
+    keyboard = HijelHID_BLEKeyboard(config.deviceName, "DanielWF");
+    keyboard.setLogLevel(HIDLogLevel::Normal);
+    keyboard.begin();
+    Serial.println(">>> [BLE] Init abgeschlossen.");
 }
 
 void sendAction(uint16_t code, uint8_t modifiers, int btnIdx) {
-    if (!bleCombo.isConnected()) return;
-
-    // Lokale Szenenwechsel (2000-2004)
+    // 1. Lokale Szenenwechsel (2000-2004)
     if (code >= 2000 && code <= 2004) {
-        currentSceneIdx = code - 2000; updateDisplay();
-        if (btnIdx != -1) startBlink(btnIdx); return;
+        currentSceneIdx = code - 2000;
+        updateDisplay();
+        if (btnIdx != -1) startBlink(btnIdx);
+        return; 
     }
 
-    // --- TASTATUR (ASCII & Sondertasten) ---
-    if (code > 0 && code < 300) {
-        uint8_t finalChar = (uint8_t)code;
+    if (!keyboard.isPaired()) return;
 
-        // Falls es ein Kleinbuchstabe ist (97-122) UND Shift aktiv ist (0x02)
-        if ((modifiers & 0x02) && (finalChar >= 97 && finalChar <= 122)) {
-            finalChar -= 32; // Macht aus 'a' (97) ein 'A' (65)
-            // Wir löschen das Shift-Bit aus den Modifiers für diesen Aufruf,
-            // da die Library bei 'A' (65) das Shift selbst drückt!
-            modifiers &= ~0x02; 
-        }
+    // 2. MODIFIER MAPPING (Exakt nach wifi_portal.cpp)
+    uint8_t activeMods = 0;
+    if (modifiers & 1) activeMods |= KEY_MOD_LCTRL;  // Bit 0: Strg
+    if (modifiers & 2) activeMods |= KEY_MOD_LSHIFT; // Bit 1: Shift
+    if (modifiers & 4) activeMods |= KEY_MOD_LALT;   // Bit 2: Alt
+    if (modifiers & 8) activeMods |= KEY_MOD_LGUI;   // Bit 3: Win
 
-        // Manuelle Modifier drücken (Strg, Alt, GUI)
-        if (modifiers & 0x01) bleCombo.press(KEY_LEFT_CTRL);
-        if (modifiers & 0x02) bleCombo.press(KEY_LEFT_SHIFT); // Nur falls nicht für A-Z verbraucht
-        if (modifiers & 0x04) bleCombo.press(KEY_LEFT_ALT);
-        if (modifiers & 0x08) bleCombo.press(KEY_LEFT_GUI);
+    // 3. TASTEN-LOGIK
+    uint8_t hidCode = 0;
+    bool isMedia = false;
 
-        // Das Zeichen senden
-        bleCombo.write(finalChar);
-        
-        delay(10);
-        bleCombo.releaseAll();
+    // Spezial-IDs aus deiner config_manager.cpp Mapping-Tabelle
+    switch(code) {
+        case 176: hidCode = KEY_RETURN; break;
+        case 177: hidCode = KEY_ESCAPE; break;
+        case 178: hidCode = KEY_BACKSPACE; break;
+        case 179: hidCode = KEY_TAB; break;
+        case 215: hidCode = KEY_RIGHT; break;
+        case 216: hidCode = KEY_LEFT; break;
+        case 217: hidCode = KEY_DOWN; break;
+        case 218: hidCode = KEY_UP; break;
+        case 209: hidCode = KEY_INSERT; break;
+        case 212: hidCode = KEY_DELETE; break;
+        case 210: hidCode = KEY_HOME; break;
+        case 213: hidCode = KEY_END; break;
+        case 211: hidCode = KEY_PAGE_UP; break;
+        case 214: hidCode = KEY_PAGE_DOWN; break;
+        // F-Tasten (194-205)
+        case 194 ... 205: hidCode = (KEY_F1 + (code - 194)); break;
+        // Media Keys
+        case 401 ... 406: isMedia = true; break;
     }
-    
-    // --- MEDIA KEYS (400er Bereich) ---
-    else if (code >= 401 && code <= 406) {
+
+    // 4. AUSFÜHRUNG
+    if (isMedia) {
+        uint16_t mKey = 0;
         switch(code) {
-            case 404: bleCombo.write(KEY_MEDIA_PLAY_PAUSE); break;
-            case 401: bleCombo.write(KEY_MEDIA_VOLUME_UP); break;
-            case 402: bleCombo.write(KEY_MEDIA_VOLUME_DOWN); break;
-            case 403: bleCombo.write(KEY_MEDIA_MUTE); break;
-            case 405: bleCombo.write(KEY_MEDIA_NEXT_TRACK); break;
-            case 406: bleCombo.write(KEY_MEDIA_PREVIOUS_TRACK); break;
+            case 401: mKey = MEDIA_VOLUME_UP; break;
+            case 402: mKey = MEDIA_VOLUME_DOWN; break;
+            case 403: mKey = MEDIA_MUTE; break;
+            case 404: mKey = MEDIA_PLAY_PAUSE; break;
+            case 405: mKey = MEDIA_NEXT_TRACK; break;
+            case 406: mKey = MEDIA_PREV_TRACK; break;
+        }
+        keyboard.tap(mKey);
+    } 
+    else if (hidCode != 0) {
+        // Navigation & Sondertasten
+        keyboard.press(hidCode, activeMods);
+        delay(35); // Haltezeit für den PC
+        keyboard.releaseAll();
+    } 
+    else if (code >= 32 && code <= 122) {
+        // Buchstaben & Zahlen (ASCII Bereich)
+        // Falls Shift im Web gesetzt ist ODER es ein Großbuchstabe (65-90) ist:
+        if ((code >= 65 && code <= 90)) {
+            activeMods |= KEY_MOD_LSHIFT;
+        }
+
+        // Wir berechnen den HID-Code für A-Z/a-z direkt (A/a = 0x04)
+        uint8_t letterHid = 0;
+        if (code >= 65 && code <= 90) letterHid = (code - 65) + 0x04;
+        else if (code >= 97 && code <= 122) letterHid = (code - 97) + 0x04;
+        else if (code >= 48 && code <= 57) letterHid = (code == 48) ? 0x27 : (code - 49) + 0x1E; // 0-9
+        else if (code == 32) letterHid = KEY_SPACE;
+
+        if (letterHid != 0) {
+            keyboard.press(letterHid, activeMods);
+            delay(35);
+            keyboard.releaseAll();
+        } else {
+            // Letzter Rettungsweg für Sonderzeichen
+            keyboard.write((uint8_t)code);
         }
     }
 
-    // --- MAUS (3000er Bereich) ---
-    else if (code >= 3001 && code <= 3004) {
-        switch(code) {
-            case 3003: bleCombo.click(MOUSE_LEFT); break;
-            case 3004: bleCombo.click(MOUSE_RIGHT); break;
-            case 3001: bleCombo.move(0, 0, 1); break;
-            case 3002: bleCombo.move(0, 0, -1); break;
-        }
-    }
-
+    keyboard.releaseAll(); // Sicherheitshalber
     if (btnIdx != -1) startBlink(btnIdx);
 }
