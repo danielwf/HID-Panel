@@ -1,6 +1,15 @@
 # HID-Panel
 ![Overview with wooden panel and Arcade-Buttons, 3D-printed Case and Phone displaying the config interface](HID-Panels.png)
 
+**Derzeit bekannte Fehler, die aktuell behoben werden:**
+- Keine Funktion mit iOS
+- OTA-Updates ohne Rückmeldung
+- Kein Werksreset implementiert
+- Tastatur/Maus-Combo macht mit manchen Systemen Probleme, so dass aktuell auf reine Tastaturemulation umgestellt wird  
+--> **Update folgt noch bis Ende April!**
+
+-----
+
 **Bluetooth-HID-Emulation with ESP32, configuration per WIFI-Portal**  
 Since this project is also aimed at German-speaking youth work, the German language is used here. Please use your browser's translation function if you need this in English or another language ;)  
 
@@ -8,7 +17,7 @@ Since this project is also aimed at German-speaking youth work, the German langu
 
 Ziel dieses Projektes ist, mit einem ESP32 und ein paar Tasten, Schalter und Drehencoder einen Tastaturemulator zu bauen.  
 Die Konfiguration erfolgt über ein Webinterface, das eine zusätzliche App überflüssig macht.  
-Das Gerät meldet sich bei normalem Start als Bluetooth-Tastatur (mit Medientasten und Mausfunktion), die sich mit jedem Gerät koppeln lässt (Windows, Linux, MacOs, Android, iOS).  
+Das Gerät meldet sich bei normalem Start als Bluetooth-Tastatur (mit Medientasten), die sich mit jedem Gerät koppeln lässt (Windows, Linux, MacOs, Android, iOS).  
 **Der Code wurde mit wesentlicher Hilfe von Google Gemini erstellt.**   
 (Natürlich ist das unschön, allerdings hat es mich so nur ein paar Urlaubstage und nicht mehrere Urlaubswochen gekostet. Wer einen ähnlichen Code handgeschrieben hinbekommt und mir ein Update schicken möchte, kann das natürlich gerne machen...)  
 
@@ -60,7 +69,7 @@ Beispiel(!) für Anschlussbelegung am ESP32:
 |Drehgeber A/CLK |  32  | (Drehgeber ist optional, wird empfohlen) |
 |Drehgeber B/DT  |  12  |                                          |
 |Drehgeber VCC   | 3.3V | bei mechanischen Drehgeber KY-040        |
-|Drehgeber VCC   | 5V   | bei optischen Drehgeber 600P/R, D1 auslöten! |
+|Drehgeber VCC   | 5V   | bei optischen Drehgeber 600P/R, D1 überbrücken! |
 |Drehgeber GND   | GND  |                                          |
 |Drehgeber SW    |  ->  | wenn vorhanden: wie eine der oben genannten Tasten verbinden |
 
@@ -79,9 +88,11 @@ Am einfachsten ist das **Flashen der bin-Dateien über den Browser**:
 
 Für die **Programmierung über die Arduino-IDE** (2.3.6 oder höher) werden folgende Abhängigkeiten benötigt: 
    - per Board Manager: Arduino ESP32-Boards (by Arduino)
-   - per Library Manager: ESPAsyncWebServer (by ESPAsync), Adafruit_SSD1306 (by Adafruit)
-   - liegt dem Projekt bei (unter src): eine auf aktuelle Arduino-Versionen angepasste HID-BLE Bibliothek von https://github.com/Kopunk/ESP32-BLE-Combo (DANKE!)
-Beim Kompilieren wird durch die HID-BLE-Bibliothek eine Warnung bezüglich der veralteten Verwendungs des ADC ausgegeben. Diese einfach ignorieren.
+   - per Library Manager:
+      - "ESP Async WebServer" (by ESPAsync)
+      - "ESP Async TCP" (by ESPAsync)
+      - "Adafruit_SSD1306" (by Adafruit)
+      - "HijelHID_BLEKEyboard (by Hijel)
 
 ## Konfiguration
 Die Konfiguration erfolgt über ein Webinterface, das beim Erststart automatisch gestartet wird. (SSID: HID-Panel-Cfg - PW: 12345678 ).  
@@ -97,24 +108,26 @@ Ein Display ist optional, wird automatisch erkannt und muss nicht konfiguriert w
    - Es lassen sich bis zu 8 Taster konfigurieren, ggf. auch als Schalter. Anschlüsse, die mit "-1" als GPIO angegeben wurden, werden nicht benutzt. 
 
 - Ein Drehgeber ist optional.  
-  Unter "Hardware" wird eingestellt, auf welchen GPIOS A/CTRL und B/DTR angeschlossen werden.  
+  Unter "Hardware" wird eingestellt, auf welchen GPIOS A/CLK und B/DTR angeschlossen werden.  
   Empfohlene Einstellungen:
   - bei mechanischen Drehgebern wie z.B. einem KY-040: 20 Schritte/U; 1 Schritte (Fein); 1000° Winkel/s (Fast)  
-  - bei optischen Drehgebern wie z.B. einem 600P/R: 600 Schritte/U; 20 Schritte (Fein); 360° Winkel/s (Fast)  
+  - bei optischen Drehgebern wie z.B. einem 600P/R: 600 Schritte/U; 20 Schritte (Fein); 360° Winkel/s (Fast)
+  - Wer die Erkennung von schnellen Drehungen nicht benötigt oder störend empfindet, stellt einfach einen sehr hohen Wert für Winkel/s ein (z.B. 5000)
 
-- Unter "Szenen" lassen sich bis zu 5 verschiedene Layout-Szenarien festlegen (Beispiele: Media, Scroll, Game, Video, Funk)
+- Unter "Szenen" lassen sich bis zu 5 verschiedene Layout-Szenarien festlegen (Beispiele: Media, Scroll, Game, Video, Funk)  
   Die Umschaltung der Szenen lässt sich wie alle Kommandos auf beliebige Buttons und Schalter legen (ganz unten in der jeweiligen Auswahl). 
 
-- Unter "Rot" wird pro Szene festgelegt, wie der Drehgeber sich verhält, bzw. welche Kommandos geschickt werden.
-  Konfiguriert werden können die L- und R-Befehle bei normaler/langsamer Drehung und bei schneller Drehung.
-  Beispiel: Bei langsamer Drehung könnte hier die Lautstärke, bei schneller Drehung der letzte oder nächste Titel gewählt werden.
-  Beispiel 2: Bei Verwendung für eine Funksoftware könnten z.B. getrennte Tasten für 100Hz- und 10Hz-Schritte eingestellt werden.
+- Unter "Rot" wird pro Szene festgelegt, wie der Drehgeber sich verhält, bzw. welche Kommandos geschickt werden.  
+  Konfiguriert werden können die L- und R-Befehle bei normaler/langsamer Drehung und bei schneller Drehung.  
+  Beispiel: Bei langsamer Drehung könnte hier die Lautstärke, bei schneller Drehung der letzte oder nächste Titel gewählt werden.  
+  Beispiel 2: Bei Verwendung für eine Funksoftware könnten z.B. getrennte Tastenbefehle für 100Hz- und 10Hz-Schritte eingestellt werden.  
 
 - Unter "SW" werden pro Szene die Schalter konfiguriert.  
-  Je Schalteränderung auf ein oder aus lassen sich unterschiedliche Tastenbefehle verknüpfen. Eignet sich z.B. auch für die Umschaltung von Szenen.  
+  Je Schalteränderung auf ein oder aus lassen sich unterschiedliche Tastenbefehle verknüpfen.  
+  Eignet sich z.B. auch super für die Umschaltung von Szenen (z.B. Aus=Mediensteuerung und An=Gaming o.ä.)  
 
 - Unter "Keys" werden pro Szene die Taster konfiguriert.  
-  Bei Verwendung eines Display empfielt es sich, eine Taste in allen Szenen so zu konfigurieren, dass diese zur jeweils nächsten Szene umschaltet.  
+  Bei Verwendung eines Displays empfielt es sich, eine selbst festgelegte Taste in allen Szenen so zu konfigurieren, dass diese zur jeweils nächsten Szene umschaltet - und von der letzten natürlich wieder zur ersten Szene ;)  
 
 ## 3D-Druck-Vorlage
 Die im Projekt integrierten 3D-Vorlagen enthalten einmal den Drehknopf passend für einen 600P/R-Drehgeber und das Gehäuse mit allen Haltern.  
