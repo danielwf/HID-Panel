@@ -1,12 +1,10 @@
 # HID-Panel
 ![Overview with wooden panel and Arcade-Buttons, 3D-printed Case and Phone displaying the config interface](HID-Panels.png)
 
-**Derzeit bekannte Fehler, die aktuell behoben werden:**
-- Keine Funktion mit iOS
-- OTA-Updates ohne Rückmeldung
-- Kein Werksreset implementiert
-- Tastatur/Maus-Combo macht mit manchen Systemen Probleme, so dass aktuell auf reine Tastaturemulation umgestellt wird  
---> **Update folgt noch bis Ende April!**
+**Update 19/04/26:**
+- Bibliothek für HID-BLE geändert, wg. Kompatibilität mit iOS 
+- OTA-Updates: Versionsanzeige, Wartehinweis und "Werksreset" mit 3facher Nachfrage ergänzt
+- Szenenumschaltung zum Testen nun auch mit nicht verbundenem Gerät möglich
 
 -----
 
