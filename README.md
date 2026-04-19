@@ -2,9 +2,11 @@
 ![Overview with wooden panel and Arcade-Buttons, 3D-printed Case and Phone displaying the config interface](HID-Panels.png)
 
 **Update 19/04/26:**
-- Bibliothek für HID-BLE geändert, wg. Kompatibilität mit iOS 
+Nach dem Update muss das Gerät einmal vom Rechner/Smartphone/Tablet getrennt und neu verbunden werden.
+Das Gerät wird nun als Tastatur erkannt, nicht mehr als Tastatur-Maus-Combo. Mausbefehle sind daher nicht mehr möglich.  
+- Bibliothek für HID-BLE geändert, wg. Kompatibilität mit iOS
 - OTA-Updates: Versionsanzeige, Wartehinweis und "Werksreset" mit 3facher Nachfrage ergänzt
-- Szenenumschaltung zum Testen nun auch mit nicht verbundenem Gerät möglich
+- Szenenumschaltung zum Testen nun auch mit nicht verbundenem Gerät möglich  
 
 -----
 
