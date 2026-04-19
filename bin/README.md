@@ -6,4 +6,4 @@ https://espressif.github.io/esptool-js/ (Chromium/Edge/Vivaldi/Chrome-Browser be
 Die Startadressen für die einzelnen Speicherbereiche sind den Dateinamen zu entnehmen.  
 Für spätere OTA-Updates über das Webinterface des Gerätes ist die Datei "0x10000_application-OTA.bin" ausreichend. 
 
-aktuelle Version 260410A
+aktuelle Version 260419B
